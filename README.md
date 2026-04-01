@@ -116,6 +116,8 @@ Add to your Claude Desktop MCP settings **WITHOUT** credentials:
 
 **Important:** No `GARMIN_EMAIL` or `GARMIN_PASSWORD` needed in config! The server uses your saved tokens.
 
+On Linux, if saved Garmin OAuth tokens are missing or expired, the server also tries to reuse an already signed-in Chromium/Chrome desktop session before falling back to interactive password login.
+
 #### Step 3: Restart Claude Desktop
 
 Your Garmin data is now available in Claude!

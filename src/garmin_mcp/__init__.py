@@ -25,6 +25,10 @@ from garmin_mcp import workout_templates
 from garmin_mcp import data_management
 from garmin_mcp import womens_health
 from garmin_mcp import nutrition
+from garmin_mcp.browser_session import (
+    BrowserSessionError,
+    create_browser_garmin_client,
+)
 
 
 def is_interactive_terminal() -> bool:
@@ -115,15 +119,33 @@ def init_api(email, password):
 
     except (FileNotFoundError, GarthHTTPError, GarminConnectAuthenticationError):
         # Session is expired. You'll need to log in again
+        if not is_cn:
+            try:
+                print(
+                    "Trying authenticated Chromium/Chrome session from the local desktop profile...\n",
+                    file=sys.stderr,
+                )
+                garmin = create_browser_garmin_client()
+                profile_dir = getattr(garmin.garth, "profile_dir", None)
+                browser_name = getattr(garmin.garth, "browser_name", "browser")
+                print(
+                    f"Using authenticated {browser_name} session from '{profile_dir}'.\n",
+                    file=sys.stderr,
+                )
+                return garmin
+            except BrowserSessionError as browser_err:
+                print(
+                    f"Browser session unavailable: {browser_err}\n",
+                    file=sys.stderr,
+                )
 
         # Check if we're in a non-interactive environment without credentials
         if not is_interactive_terminal() and (not email or not password):
             print(
-                "ERROR: OAuth tokens not found and no interactive terminal available.\n"
+                "ERROR: OAuth tokens not found, browser session was not usable, and no interactive terminal is available.\n"
                 "Please authenticate first:\n"
-                "  1. Run: garmin-mcp-auth\n"
-                "  2. Enter your credentials and MFA code\n"
-                "  3. Restart your MCP client\n"
+                "  1. Log in to https://connect.garmin.com/ in Chromium/Chrome, or run: garmin-mcp-auth\n"
+                "  2. Restart your MCP client\n"
                 f"Tokens will be saved to: {tokenstore}\n",
                 file=sys.stderr,
             )

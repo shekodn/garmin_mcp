@@ -7,8 +7,12 @@ import datetime
 import os
 from pathlib import Path
 
+import pytest
 from dotenv import load_dotenv
 from garminconnect import Garmin
+
+
+pytestmark = pytest.mark.e2e
 
 # Load environment variables from .env file
 env_path = Path(__file__).parent / '.env'
